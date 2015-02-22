@@ -3,6 +3,8 @@
 <head>
 	<title>Transformer</title>
 	<link rel="import" href="templates/getter-fields.html">
+	<link rel="import" href="templates/getter-prop-fields.html">
+	<link rel="import" href="templates/setter-fields.html">
 	<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
 	<link rel="stylesheet" href="styles/bootstrap-cyborg.min.css">
 	<link rel="stylesheet/less" type="text/css" href="styles/styles.less">
@@ -19,44 +21,22 @@
 				<div class="col-xs-6">
 					<div class="form-group">
 						<label>Source</label>
-						<input type="file" class="form-control" name="sourceDir" nwdirectory>
+						<input type="file" class="form-control" name="sourceDirDialog" nwdirectory>
+						<input type="hidden" name="sourceDir">
 					</div>					
 				</div>
 				<div class="col-xs-6">
 					<div class="form-group">
 						<label>Destination</label>
-						<input type="file" class="form-control" name="destDir" nwdirectory>
+						<input type="file" class="form-control" name="destDirDialog" nwdirectory>
+						<input type="hidden" name="destDir">
 					</div>					
 				</div>
 			</div>
 			<h3 class="text-primary">Getters</h3>
 			<div class="row tf-getters"></div>
 			<h3 class="text-primary">Setters</h3>
-			<div class="row tf-setters">
-				<div class="col-xs-5">
-					<div class="form-group">
-						<label>Selector</label>
-						<input type="text" class="form-control" name="setters[0][selector]">
-					</div>
-				</div>
-				<div class="col-xs-1">
-					<div class="form-group">
-						<label class="empty-label">&nbsp;</label>
-						<button type="button" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Add selector" name="add-set-selector">
-							<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-						</button>
-						<button type="button" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Remove selector" name="remove-set-selector">
-							<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
-						</button>
-					</div>
-				</div>
-				<div class="col-xs-6">
-					<div class="form-group">
-						<label>Replacer</label>
-						<textarea class="form-control" name="setters[0][replacer]"></textarea>
-					</div>
-				</div>
-			</div>
+			<div class="row tf-setters"></div>
 			<div class="row">
 				<div class="col-xs-12">
 					<button type="submit" class="btn btn-danger">Transform</button>

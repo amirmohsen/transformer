@@ -16,10 +16,7 @@ function Transformer () {
 	templates = {},
 	input = {},
 	map = [],
-	variables = [],
-	indices = {
-		"getter-fields": 0
-	};
+	variables = [];
 	
 	init();
 
@@ -53,16 +50,17 @@ function Transformer () {
 	}
 
 	function loadView(){
-		$("div.tf-getters").html( Mustache.render(
-			templates["getter-fields"], { index: indices["getter-fields"] }) );
-		indices["getter-fields"]++;
+		$("div.tf-getters").append( newRow("getter-fields") );
+		$("div.tf-setters").append( newRow("setter-fields") );
 	}
 
 	function listen () {
 
 		$("body").on("click", "button.row-creation", addAndRemoveRows);
 
-		// $form.submit(readInput);
+		$("body").on("change", "select.getters-prop-type", alternatePropName);
+
+		$form.submit(readInput);
 	}
 
 	function addAndRemoveRows(event){
@@ -75,28 +73,83 @@ function Transformer () {
 		$currentFields = $button.closest("div." + name);
 
 		if(action === "remove"){
-			if($("div." + name).length > 1)
+			if($currentFields.siblings("div." + name).length > 0)
 				$currentFields.remove();
 			return;
 		}
 
-		$newFields = $( Mustache.render(
-			templates[name], { index: indices[name] }) );
+		$currentFields.after( newRow(name) );
+	}
 
-		$newFields.insertAfter($currentFields);
-		indices[name]++;
+	function newRow(name){
+		var $newRow = $(templates[name]);
+
+		if(name==="getter-fields"){
+			$newRow
+				.find("div.tf-getters-props")
+				.html(templates["getter-prop-fields"]);
+		}
+
+		return $newRow;
+	}
+
+	function alternatePropName(event) {
+		var $dropdown = $(event.target),
+			$dropdownCol = $dropdown.closest("div.resizing-column"),
+			$nameCol = $dropdownCol.siblings("div.vanishing-column"),
+			$nameInput = $nameCol.find("input.getters-prop-name"),
+			value = $dropdown.val();
+
+		switch(value){
+			case "Specific attribute":
+				if($dropdownCol.hasClass("col-xs-4"))
+					return;
+				turnPropNameOn();
+				break;
+			default:
+				if($dropdownCol.hasClass("col-xs-6"))
+					return;
+				turnPropNameOff();
+				break;
+		}
+
+		function turnPropNameOn(){
+			$dropdownCol.removeClass("col-xs-6");
+			$dropdownCol.addClass("col-xs-4");
+			$nameCol.removeClass("hidden");
+			$nameInput.removeAttr("disabled");
+		}
+
+		function turnPropNameOff(){
+			$dropdownCol.removeClass("col-xs-4");
+			$dropdownCol.addClass("col-xs-6");
+			$nameCol.addClass("hidden");
+			$nameInput.val("");
+			$nameInput.attr("disabled","");
+		}
 	}
 
 	function readInput(event) {
 		event.preventDefault();
+
+		$("input[name='sourceDir']")
+			.val($("input[name='sourceDirDialog']").val());
+
+		$("input[name='destDir']")
+			.val($("input[name='destDirDialog']").val());
+
 		input = $form.serializeJSON();
-		$dirInputs.each(function(){
-			var $input = $(this);
-			input[$input.attr("name")] = $input.val();
-		});
-		serializeDOM();
-		console.log(map);
-		readDirRecursively("");
+
+		console.log(input);
+
+		// input = $form.serializeJSON();
+		// $dirInputs.each(function(){
+		// 	var $input = $(this);
+		// 	input[$input.attr("name")] = $input.val();
+		// });
+		// serializeDOM();
+		// console.log(map);
+		// readDirRecursively("");
 	}
 
 	function serializeDOM() {
