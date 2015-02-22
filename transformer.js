@@ -60,6 +60,8 @@ function Transformer () {
 
 		$("body").on("change", "select.getters-prop-type", alternatePropName);
 
+		$("body").on("keydown", "textarea.allow-tab-indentation", allowTabIndentation);
+
 		$form.submit(readInput);
 	}
 
@@ -126,6 +128,27 @@ function Transformer () {
 			$nameCol.addClass("hidden");
 			$nameInput.val("");
 			$nameInput.attr("disabled","");
+		}
+	}
+
+	function allowTabIndentation(event){
+
+		if(event.keyCode === 9) {
+
+			var 
+				textArea = event.target,
+				$textArea = $(textArea),
+				start = textArea.selectionStart;
+				end = textArea.selectionEnd,
+				value = $textArea.val();
+
+		    $textArea.val(value.substring(0, start)
+		                + "\t"
+		                + value.substring(end));
+
+		    textArea.selectionStart = textArea.selectionEnd = start + 1;
+
+		    event.preventDefault();
 		}
 	}
 
