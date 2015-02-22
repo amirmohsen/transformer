@@ -1,40 +1,90 @@
 var
-	FS = require("fs-extra"),
-	Cheerio = require("cheerio"),
-	JSBeautify = require("js-beautify"),
-	Mustache = require("mustache"),
-	ReverseMustache = require("reverse-mustache"),
-	Path = require("path"),
-	ngui = require('nw.gui'),
-	nwin = ngui.Window.get();
+FS = require("fs-extra"),
+Cheerio = require("cheerio"),
+JSBeautify = require("js-beautify"),
+Mustache = require("mustache"),
+ReverseMustache = require("reverse-mustache"),
+Path = require("path"),
+ngui = require('nw.gui'),
+nwin = ngui.Window.get();
 
 function Transformer () {
 
 	var 
-		$form = $("#transformer-form"),
-		$dirInputs = $("input[type='file']");
-		input = {},
-		map = [],
-		variables = [];
+	$form = $("#transformer-form"),
+	$dirInputs = $("input[type='file']"),
+	templates = {},
+	input = {},
+	map = [],
+	variables = [],
+	indices = {
+		"getter-fields": 0
+	};
 	
 	init();
 
 	function init () {
 
-		// onload = function() {
-		//     nwin.show();
-		//     nwin.maximize();
-		// };
+		$(function () {
+			$('[data-toggle="tooltip"]').tooltip();
+		});
 
-		// FS.watch("./", function() {
-		// 	nwin.reloadDev();
-		// });
+		onload = function() {
+			nwin.show();
+			nwin.maximize();
+		};
 
+		FS.watch("./", function() {
+			nwin.reloadDev();
+		});
+
+		loadTemplates();
+		loadView();
 		listen();
 	}
 
+	function loadTemplates(){
+		var imports = document.querySelectorAll('link[rel="import"]');
+		templates.getterFields
+		for(var i=0; i<imports.length; i++){
+			var $template = $(imports[i].import).find("template");
+			templates[$template.attr("data-name")] = $template.html();
+		}
+	}
+
+	function loadView(){
+		$("div.tf-getters").html( Mustache.render(
+			templates["getter-fields"], { index: indices["getter-fields"] }) );
+		indices["getter-fields"]++;
+	}
+
 	function listen () {
-		$form.submit(readInput)
+
+		$("body").on("click", "button.row-creation", addAndRemoveRows);
+
+		// $form.submit(readInput);
+	}
+
+	function addAndRemoveRows(event){
+		var action, name, buttonName, $button, $currentFields, $newFields;
+
+		$button = $(event.target);
+		action = $button.attr("data-action");
+		name = $button.attr("data-name");
+
+		$currentFields = $button.closest("div." + name);
+
+		if(action === "remove"){
+			if($("div." + name).length > 1)
+				$currentFields.remove();
+			return;
+		}
+
+		$newFields = $( Mustache.render(
+			templates[name], { index: indices[name] }) );
+
+		$newFields.insertAfter($currentFields);
+		indices[name]++;
 	}
 
 	function readInput(event) {
@@ -104,11 +154,11 @@ function Transformer () {
 	function readDirRecursively(path) {
 
 		var 
-			contents = FS.readdirSync(Path.join(input.sourceDir, path)),
-			tempPath = "",
-			readPath = "",
-			writePath = "",
-			stats = null;
+		contents = FS.readdirSync(Path.join(input.sourceDir, path)),
+		tempPath = "",
+		readPath = "",
+		writePath = "",
+		stats = null;
 
 		contents.forEach(function(content){
 			tempPath = Path.join(path, content);
@@ -118,11 +168,11 @@ function Transformer () {
 			if(stats.isDirectory())
 				readDirRecursively(tempPath);
 			else if(stats.isFile() &&
-					Path.extname(readPath) === ".html"){
+				Path.extname(readPath) === ".html"){
 				writePath = Path.join(input.destDir, tempPath);
-				processFile(readPath, writePath);
-			}
-		});
+			processFile(readPath, writePath);
+		}
+	});
 	}
 
 	function processFile(readPath, writePath) {
@@ -167,4 +217,9 @@ function Transformer () {
 	}
 }
 
-new Transformer();
+try{
+	new Transformer();
+}
+catch(err){
+	console.error(err.stack);
+}

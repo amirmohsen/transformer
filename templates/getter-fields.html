@@ -1,0 +1,57 @@
+<template data-name="getter-fields">
+	<div class="getter-fields">
+		<div class="col-xs-5">
+			<div class="form-group">
+				<label>Selector</label>
+				<input type="text" class="form-control" name="getters[{{index}}][selector]">
+			</div>
+		</div>
+		<div class="col-xs-1">
+			<div class="form-group">
+				<label class="empty-label">&nbsp;</label>
+				<button type="button" class="btn btn-info row-creation" data-toggle="tooltip" data-placement="top" title="Add selector" data-action="add" data-name="getter-fields">
+					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				</button>
+				<button type="button" class="btn btn-warning row-creation" data-toggle="tooltip" data-placement="top" title="Remove selector" data-action="remove" data-name="getter-fields">
+					<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+				</button>
+			</div>
+		</div>
+		<div class="col-xs-2">
+			<div class="form-group">
+				<label>Property</label>
+				<select class="form-control" name="getters[{{index}}][prop][type]">
+					<option>OuterHTML</option>
+					<option>InnerHTML</option>
+					<option>Text</option>
+					<option>All Attributes (incl. classes)</option>
+					<option>All Classes</option>
+					<option>Specific attribute</option>
+				</select>
+			</div>
+		</div>
+		<div class="col-xs-1">
+			<div class="form-group">
+				<label>Name</label>
+				<input type="text" class="form-control" name="getters[{{index}}][prop][name]">
+			</div>
+		</div>
+		<div class="col-xs-2">
+			<div class="form-group">
+				<label>Variable</label>
+				<input type="text" class="form-control" name="getters[{{index}}][prop][var]">
+			</div>
+		</div>
+		<div class="col-xs-1">
+			<div class="form-group">
+				<label class="empty-label">&nbsp;</label>
+				<button type="button" class="btn btn-info" data-toggle="tooltip" data-placement="top" title="Add property" name="add-get-prop">
+					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+				</button>
+				<button type="button" class="btn btn-warning" data-toggle="tooltip" data-placement="top" title="Remove property" name="remove-get-prop">
+					<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+				</button>
+			</div>
+		</div>
+	</div>
+</template>
