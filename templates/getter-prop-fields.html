@@ -1,40 +1,40 @@
 <template data-name="getter-prop-fields">
-	<div class="row getter-prop-fields">
-		<div class="col-xs-6 resizing-column">
-			<div class="form-group">
-				<label>Property</label>
-				<select class="form-control getters-prop-type" name="getters[][prop][][type]">
-					<option>OuterHTML</option>
-					<option>InnerHTML</option>
-					<option>Text</option>
-					<option>All Attributes (incl. classes)</option>
-					<option>All Classes</option>
-					<option>Specific attribute</option>
-				</select>
-			</div>
-		</div>
-		<div class="col-xs-2 vanishing-column hidden">
-			<div class="form-group">
-				<label>Name</label>
-				<input type="text" class="form-control getters-prop-name" name="getters[][prop][][name]" disabled>
-			</div>
-		</div>
-		<div class="col-xs-4">
-			<div class="form-group">
-				<label>Variable</label>
-				<input type="text" class="form-control" name="getters[][prop][][var]">
-			</div>
-		</div>
-		<div class="col-xs-2">
-			<div class="form-group">
-				<label class="empty-label">&nbsp;</label>
-				<button type="button" class="btn btn-info row-creation" data-toggle="tooltip" data-placement="top" title="Add property" data-action="add" data-name="getter-prop-fields">
-					<span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
-				</button>
-				<button type="button" class="btn btn-warning row-creation" data-toggle="tooltip" data-placement="top" title="Remove property" data-action="remove" data-name="getter-prop-fields">
-					<span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
-				</button>
-			</div>
-		</div>
-	</div>
+    <div class="row getter-prop-fields">
+        <div class="col-xs-6 resizing-column">
+            <div class="form-group">
+                <label>Property</label>
+                <select class="form-control getters-prop-type" name="getters[][props][][type]">
+                    <option value="outerhtml">OuterHTML</option>
+                    <option value="innerhtml">InnerHTML</option>
+                    <option value="text">Text</option>
+                    <option value="all-attrs">All attributes (incl. classes)</option>
+                    <option value="all-classes">All classes</option>
+                    <option value="attr">Specific attribute</option>
+                </select>
+            </div>
+        </div>
+        <div class="col-xs-2 vanishing-column hidden">
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" class="form-control getters-prop-name" name="getters[][props][][name]" disabled>
+            </div>
+        </div>
+        <div class="col-xs-4">
+            <div class="form-group">
+                <label>Variable</label>
+                <input type="text" class="form-control" name="getters[][props][][variable]">
+            </div>
+        </div>
+        <div class="col-xs-2">
+            <div class="form-group">
+                <label class="empty-label">&#xA0;</label>
+                <button type="button" class="btn btn-info row-creation" data-toggle="tooltip" data-placement="top" title="Add property" data-action="add" data-name="getter-prop-fields">
+                    <span class="glyphicon glyphicon-plus" aria-hidden="true"></span>
+                </button>
+                <button type="button" class="btn btn-warning row-creation" data-toggle="tooltip" data-placement="top" title="Remove property" data-action="remove" data-name="getter-prop-fields">
+                    <span class="glyphicon glyphicon-minus" aria-hidden="true"></span>
+                </button>
+            </div>
+        </div>
+    </div>
 </template>

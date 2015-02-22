@@ -1,7 +1,7 @@
 var
 FS = require("fs-extra"),
 Cheerio = require("cheerio"),
-JSBeautify = require("js-beautify"),
+HTMLBeautify = require("js-beautify").html,
 Mustache = require("mustache"),
 ReverseMustache = require("reverse-mustache"),
 Path = require("path"),
@@ -15,8 +15,8 @@ function Transformer () {
 	$dirInputs = $("input[type='file']"),
 	templates = {},
 	input = {},
-	map = [],
-	variables = [];
+	variables = [],
+	output = "";
 	
 	init();
 
@@ -60,7 +60,11 @@ function Transformer () {
 
 		$("body").on("change", "select.getters-prop-type", alternatePropName);
 
+		$("body").on("change", "input[name='output[type]']", alternateOutput);
+
 		$("body").on("keydown", "textarea.allow-tab-indentation", allowTabIndentation);
+
+		$(document).on("keydown", keyboardShortcuts);
 
 		$form.submit(readInput);
 	}
@@ -103,7 +107,7 @@ function Transformer () {
 			value = $dropdown.val();
 
 		switch(value){
-			case "Specific attribute":
+			case "attr":
 				if($dropdownCol.hasClass("col-xs-4"))
 					return;
 				turnPropNameOn();
@@ -131,6 +135,22 @@ function Transformer () {
 		}
 	}
 
+	function alternateOutput(event){
+		var 
+			$radioButton = $(event.target),
+			$textArea = $("textarea[name='output[template]']"),
+			outputType = $radioButton.val();
+
+		switch(outputType){
+			case "page":
+				$textArea.attr("disabled", "");
+				break;
+			case "template":
+				$textArea.removeAttr("disabled");
+				break;
+		}
+	}
+
 	function allowTabIndentation(event){
 
 		if(event.keyCode === 9) {
@@ -152,6 +172,20 @@ function Transformer () {
 		}
 	}
 
+	function keyboardShortcuts(event){
+
+		switch(event.keyCode){
+			case 116:
+				nwin.reloadDev();
+				event.preventDefault();
+				break;
+			case 123:
+				nwin.showDevTools();
+				event.preventDefault();
+				break;
+		}
+	}
+
 	function readInput(event) {
 		event.preventDefault();
 
@@ -163,68 +197,7 @@ function Transformer () {
 
 		input = $form.serializeJSON();
 
-		console.log(input);
-
-		// input = $form.serializeJSON();
-		// $dirInputs.each(function(){
-		// 	var $input = $(this);
-		// 	input[$input.attr("name")] = $input.val();
-		// });
-		// serializeDOM();
-		// console.log(map);
-		// readDirRecursively("");
-	}
-
-	function serializeDOM() {
-		var allNodes = $(input.inputTemplate).get();
-		map = [];
-
-		walkTheDom(allNodes, map);
-
-		function walkTheDom (nodeList, map) {
-			for(var i=0; i<nodeList.length; i++){
-				var nodeEntry = captureNode(nodeList[i]);
-				if(nodeEntry)
-					map.push(nodeEntry);
-			}
-		}
-
-		function captureNode (node) {
-			var nodeEntry;
-			if(node.nodeName==="#text"){
-				var val = node.nodeValue.trim();
-				if(!val)
-					return;
-				nodeEntry = {
-					name: node.nodeName,
-					value: val
-				};
-			}
-			else{
-				var classes = [], attrs = [];
-				
-				for(var i=0; i<node.classList.length; i++)
-					classes.push(node.classList.item(i));
-
-				for(var i=0; i<node.attributes.length; i++){
-					if(node.attributes[i].name!=="class"){
-						attrs[i] = {
-							name: node.attributes[i].name,
-							value: node.attributes[i].value
-						}
-					}
-				}
-
-				nodeEntry = {
-					name: node.nodeName,
-					classes: classes,
-					attrs: attrs,
-					nodes: []
-				};
-				walkTheDom(node.childNodes, nodeEntry.nodes);
-			}
-			return nodeEntry;
-		}
+		readDirRecursively("");
 	}
 
 	function readDirRecursively(path) {
@@ -257,39 +230,79 @@ function Transformer () {
 		});
 
 		variables = [];
+		output = "";
 
-		// extractVariables(fileContents);
+		var $ = Cheerio.load(fileContents);
 		
-		// FS.outputFileSync(writePath, fileContents, "utf8");
+		extractVariables($);
+		performReplacements($);
+
+		if(input.output.type === "template")
+			output = outputTemplate();
+		else if(input.output.type === "page")
+			output = $.html();
+		
+		output = HTMLBeautify(output);
+
+		FS.outputFileSync(writePath, output, "utf8");
 	}
 
-	function extractVariables(htmlContent) {
-		var $dom = $(htmlContent);
+	function extractVariables($) {		
 
-		// function exploreMap($element, plan){
-		// 	var $contents = $element.contents();
-		// 	for(var i=0; i<nodes.length; i++){
-		// 		var $child = .index(i)
-		// 		if(nodes[i].name==="#text"){
-		// 			var text = $element.text();
-		// 			var vars = reverseMustache({
-		// 				template: nodes[i].value,
-		// 				content: text
-		// 			});
-		// 			if(vars)
-		// 				variables.push.apply(variables, vars);
-		// 		}
-		// 		else{
+		input.getters.forEach(function (getter){
+			var $element = $(getter.selector);
+			if($element.length>0){
+				getter.props.forEach(function(prop){
+					var variable;
+					switch(prop.type){
+						case "outerhtml":
+							variable = $.html($element);
+							break;
+						case "innerhtml":
+							variable = $element.html();
+							break;
+						case "text":
+							variable = $element.text();
+							break;
+						case "all-attrs":
+							var 
+								attrsObj = $element.attr(),
+								attrs = "";
+							for(var key in attrsObj){
+								if(attrsObj.hasOwnProperty(key)){
+									if(attrs !== "")
+										attrs += " ";
+									attrs += key + "=\"" + attrsObj[key] + "\"";
+								}
+							}
+							variable = attrs;
+							break;
+						case "all-classes":
+							variable = $element.attr("class");
+							break;
+						case "attr":
+							variable = $element.attr(prop.name);
+							break;
+					}
+					if(variable)
+						variables[prop.variable] = variable;
+				});
+			}
+		});
+	}
 
-		// 		}
-		// 	}
-		// }
+	function performReplacements($){
 
-		// function buildSelector(tag, classes, attrs){
+		input.setters.forEach(function (setter){
+			var $element = $(setter.selector);
+			if($element.length>0){
+				$element.replaceWith(Mustache.render(setter.replacer,variables));
+			}
+		});
+	}
 
-		// }
-
-		// return exploreMap($dom, map);
+	function outputTemplate(){
+		return Mustache.render(input.output.template, variables);
 	}
 }
 

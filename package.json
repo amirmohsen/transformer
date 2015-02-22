@@ -33,5 +33,8 @@
     "js-beautify": "^1.5.4",
     "mustache": "^1.1.0",
     "reverse-mustache": "^1.6.2"
+  },
+  "window": {
+    "toolbar": false
   }
 }
