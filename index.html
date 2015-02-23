@@ -2,90 +2,129 @@
 <html>
 
 <head>
-    <title>Transformer</title>
-    <link rel="import" href="templates/getter-fields.html">
-    <link rel="import" href="templates/getter-prop-fields.html">
-    <link rel="import" href="templates/setter-fields.html">
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
-    <link rel="stylesheet" href="styles/bootstrap-cyborg.min.css">
-    <link rel="stylesheet/less" type="text/css" href="styles/styles.less">
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/less.js/2.3.1/less.min.js"></script>
-    <script src="bower_components/jquery.serializejson/jquery.serializejson.min.js"></script>
+	<title>Transformer</title>
+	<link rel="import" href="templates/getter-fields.html">
+	<link rel="import" href="templates/getter-prop-fields.html">
+	<link rel="import" href="templates/setter-fields.html">
+	<link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.min.css">
+	<link rel="stylesheet" href="styles/bootstrap-cyborg.min.css">
+	<link rel="stylesheet/less" type="text/css" href="styles/styles.less">
+	<script src="bower_components/jquery/dist/jquery.min.js"></script>
+	<script src="bower_components/bootstrap/dist/js/bootstrap.min.js"></script>
+	<script src="bower_components/less/dist/less.min.js"></script>
+	<script src="bower_components/jquery.serializejson/jquery.serializejson.min.js"></script>
 </head>
 
 <body>
-    <div class="container-fluid">
-        <form id="transformer-form">
-            <h3 class="text-primary">Directories</h3>
-            <div class="row tf-directories">
-                <div class="col-xs-6">
-                    <div class="form-group">
-                        <label>Source</label>
-                        <input type="file" class="form-control" name="sourceDirDialog" nwdirectory="" required>
-                        <input type="hidden" name="sourceDir">
-                    </div>
-                </div>
-                <div class="col-xs-6">
-                    <div class="form-group">
-                        <label>Destination</label>
-                        <input type="file" class="form-control" name="destDirDialog" nwdirectory="" required>
-                        <input type="hidden" name="destDir">
-                    </div>
-                </div>
-            </div>
-            <h3 class="text-primary">Getters</h3>
-            <div class="row tf-getters"></div>
-            <h3 class="text-primary">Setters</h3>
-            <div class="row tf-setters"></div>
-            <h3 class="text-primary">Output</h3>
-            <div class="row tf-output">
-                <div class="col-xs-6">
-                    <div class="form-group">
-                        <label>Existing page with changes</label>
-                        <input class="form-control" type="radio" name="output[type]" value="page" checked>
-                    </div>
-                </div>
-                <div class="col-xs-6">
-                    <div class="form-group">
-                        <label>Template below</label>
-                        <input class="form-control" type="radio" name="output[type]" value="template">
-                    </div>
-                </div>
-                <div class="col-xs-12">
-                    <div class="form-group">
-                        <label>Template</label>
-                        <textarea class="form-control allow-tab-indentation" name="output[template]" disabled></textarea>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-xs-12">
-                    <button type="submit" class="btn btn-danger" data-toggle="modal" data-target="#transformation-status-modal">Transform</button>
-                </div>
-            </div>
-        </form>
-    </div>
+	<div class="container-fluid">
+		<form id="transformer-form">
+			<h3 class="text-primary">Parser options</h3>
+			<div class="row tf-parser-options">
+				<div class="col-xs-2">
+					<div class="form-group">
+						<label>XML mode</label>
+						<input class="form-control" type="checkbox" name="parser[xmlMode]:boolean" value="true" data-unchecked-value="false">
+					</div>
+				</div>
+				<div class="col-xs-2">
+					<div class="form-group">
+						<label>Decode HTML entities</label>
+						<input class="form-control" type="checkbox" name="parser[decodeEntities]:boolean" value="true" data-unchecked-value="false">
+					</div>
+				</div>
+				<div class="col-xs-2">
+					<div class="form-group">
+						<label>Lowercase all tags</label>
+						<input class="form-control" type="checkbox" name="parser[lowerCaseTags]:boolean" value="true" data-unchecked-value="false">
+					</div>
+				</div>
+				<div class="col-xs-2">
+					<div class="form-group">
+						<label>Lowercase all attributes</label>
+						<input class="form-control" type="checkbox" name="parser[lowerCaseAttributeNames]:boolean" value="true" data-unchecked-value="false">
+					</div>
+				</div>
+				<div class="col-xs-2">
+					<div class="form-group">
+						<label>Recognize CDATA</label>
+						<input class="form-control" type="checkbox" name="parser[recognizeCDATA]:boolean" value="true" data-unchecked-value="false">
+					</div>
+				</div>
+				<div class="col-xs-2">
+					<div class="form-group">
+						<label>Recognize self-closing tags</label>
+						<input class="form-control" type="checkbox" name="parser[recognizeSelfClosing]:boolean" value="true" data-unchecked-value="false">
+					</div>
+				</div>
+			</div>
+			<h3 class="text-primary">Directories</h3>
+			<div class="row tf-directories">
+				<div class="col-xs-6">
+					<div class="form-group">
+						<label>Source</label>
+						<input type="file" class="form-control" name="sourceDirDialog" nwdirectory="" required>
+						<input type="hidden" name="sourceDir">
+					</div>
+				</div>
+				<div class="col-xs-6">
+					<div class="form-group">
+						<label>Destination</label>
+						<input type="file" class="form-control" name="destDirDialog" nwdirectory="" required>
+						<input type="hidden" name="destDir">
+					</div>
+				</div>
+			</div>
+			<h3 class="text-primary">Getters</h3>
+			<div class="row tf-getters"></div>
+			<h3 class="text-primary">Setters</h3>
+			<div class="row tf-setters"></div>
+			<h3 class="text-primary">Output</h3>
+			<div class="row tf-output">
+				<div class="col-xs-6">
+					<div class="form-group">
+						<label>Existing page with changes</label>
+						<input class="form-control" type="radio" name="output[type]" value="page" checked>
+					</div>
+				</div>
+				<div class="col-xs-6">
+					<div class="form-group">
+						<label>Template below</label>
+						<input class="form-control" type="radio" name="output[type]" value="template">
+					</div>
+				</div>
+				<div class="col-xs-12">
+					<div class="form-group">
+						<label>Template</label>
+						<textarea class="form-control allow-tab-indentation" name="output[template]" disabled></textarea>
+					</div>
+				</div>
+			</div>
+			<div class="row">
+				<div class="col-xs-12">
+					<button type="submit" class="btn btn-danger" data-toggle="modal" data-target="#transformation-status-modal">Transform</button>
+				</div>
+			</div>
+		</form>
+	</div>
 
-    <div class="modal fade" id="transformation-status-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
-      <div class="modal-dialog modal-lg">
-        <div class="modal-content">
-          <div class="modal-header">
-            <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-            <h4 class="modal-title" id="myModalLabel">Transformation Progress</h4>
-          </div>
-          <div class="modal-body">
-            <ul class="list-group"></ul>
-          </div>
-          <div class="modal-footer">
-            <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-          </div>
-        </div>
-      </div>
-    </div>
+	<div class="modal fade" id="transformation-status-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content">
+				<div class="modal-header">
+					<button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+					<h4 class="modal-title" id="myModalLabel">Transformation Progress</h4>
+				</div>
+				<div class="modal-body">
+					<ul class="list-group"></ul>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+				</div>
+			</div>
+		</div>
+	</div>
 
-    <script src="transformer.js"></script>
+	<script src="transformer.js"></script>
 </body>
 
 </html>

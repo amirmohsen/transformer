@@ -4,7 +4,8 @@
   "description": "A utility app that parses html out of one file and extracts relevant data according to a given template and inserts it into a new html file.",
   "main": "index.html",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodewebkit"
   },
   "repository": {
     "type": "git",
@@ -33,9 +34,11 @@
     "js-beautify": "^1.5.4",
     "mustache": "^1.1.0",
     "node-uuid": "^1.4.2",
+    "nodewebkit": "^0.11.6",
     "reverse-mustache": "^1.6.2"
   },
   "window": {
+    "show": false,
     "toolbar": false
   }
 }

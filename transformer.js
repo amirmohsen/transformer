@@ -64,6 +64,8 @@ function Transformer () {
 
 		$("body").on("change", "input[name='output[type]']", alternateOutput);
 
+		$("body").on("change", "input[name^='parser[xmlMode]']", checkXMLoptions);
+
 		$("body").on("keydown", "textarea.allow-tab-indentation", allowTabIndentation);
 
 		$(document).on("keydown", keyboardShortcuts);
@@ -153,6 +155,22 @@ function Transformer () {
 		}
 	}
 
+	function checkXMLoptions(event){
+		var $xmlCheckbox = $(event.target),
+			$cdataCheckbox = $("input[name^='parser[recognizeCDATA]']"),
+			$selfClosingCheckbox = $("input[name^='parser[recognizeSelfClosing]']");
+
+		if($xmlCheckbox.prop("checked")){
+			$cdataCheckbox.prop("checked", true).attr("disabled","");
+			$selfClosingCheckbox.prop("checked", true).attr("disabled","");
+		}
+		else{
+			$cdataCheckbox.prop("checked", false).removeAttr("disabled");
+			$selfClosingCheckbox.prop("checked", false).removeAttr("disabled");
+		}
+
+	}
+
 	function allowTabIndentation(event){
 
 		if(event.keyCode === 9) {
@@ -191,10 +209,10 @@ function Transformer () {
 	function readInput(event) {
 
 		event.preventDefault();
-
+		
 		if(working)
 			return;
-
+		
 		working = true;
 
 		clearProgressList();
@@ -205,7 +223,9 @@ function Transformer () {
 		$("input[name='destDir']")
 			.val($("input[name='destDirDialog']").val());
 
-		input = $form.serializeJSON();
+		input = $form.serializeJSON({
+			parseBooleans: true
+		});
 
 		setTimeout(function(){
 			readDirRecursively("");
@@ -215,7 +235,7 @@ function Transformer () {
 	function readDirRecursively(path) {
 
 		FS.readdir(Path.join(input.sourceDir, path), function(err, contents){
-			itemsRemaining = contents.length;
+			itemsRemaining += contents.length;
 			contents.forEach(function(content){
 
 				var tempPath = "",
@@ -234,6 +254,8 @@ function Transformer () {
 						writePath = Path.join(input.destDir, tempPath);						
 						processFile(readPath, writePath, tempPath);
 					}
+					else
+						itemsRemaining--;
 				});				
 			});
 		});
@@ -249,11 +271,7 @@ function Transformer () {
 		}, function (err, fileContents) {
 			var variables = [],
 				output = "",
-				$ = Cheerio.load(fileContents,{
-					lowerCaseAttributeNames: false,
-					lowerCaseTags: false,
-					decodeEntities: false
-				});
+				$ = Cheerio.load(fileContents, input.parser);
 			
 			extractVariables($, variables);
 			performReplacements($, variables);
