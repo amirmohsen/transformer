@@ -5,6 +5,7 @@ HTMLBeautify = require("js-beautify").html,
 Mustache = require("mustache"),
 ReverseMustache = require("reverse-mustache"),
 Path = require("path"),
+UUID = require("node-uuid"),
 ngui = require('nw.gui'),
 nwin = ngui.Window.get();
 
@@ -16,8 +17,7 @@ function Transformer () {
 	$progressList = $("#transformation-status-modal div.modal-body ul.list-group"),
 	templates = {},
 	input = {},
-	variables = [],
-	output = "";
+	itemsRemaining = 0,
 	working = false;
 	
 	init();
@@ -210,61 +210,67 @@ function Transformer () {
 		setTimeout(function(){
 			readDirRecursively("");
 		}, 500);
-
-		working = false;
 	}
 
 	function readDirRecursively(path) {
 
-		var 
-		contents = FS.readdirSync(Path.join(input.sourceDir, path)),
-		tempPath = "",
-		readPath = "",
-		writePath = "",
-		stats = null;
+		FS.readdir(Path.join(input.sourceDir, path), function(err, contents){
+			itemsRemaining = contents.length;
+			contents.forEach(function(content){
 
-		contents.forEach(function(content){
-			tempPath = Path.join(path, content);
-			readPath = Path.join(input.sourceDir, tempPath);			
-			stats = FS.statSync(readPath);
+				var tempPath = "",
+					readPath = "",
+					writePath = "";
 
-			if(stats.isDirectory())
-				readDirRecursively(tempPath);
-			else if(stats.isFile() &&
-				Path.extname(readPath) === ".html"){
-				writePath = Path.join(input.destDir, tempPath);
-				addNewItemToProgressList(tempPath);
-				processFile(readPath, writePath);
-			}
+				tempPath = Path.join(path, content);
+				readPath = Path.join(input.sourceDir, tempPath);			
+				FS.stat(readPath, function(err, stats){
+					if(stats.isDirectory()){
+						itemsRemaining--;
+						readDirRecursively(tempPath);
+					}
+					else if(stats.isFile() &&
+						Path.extname(readPath) === ".html"){
+						writePath = Path.join(input.destDir, tempPath);						
+						processFile(readPath, writePath, tempPath);
+					}
+				});				
+			});
 		});
-
-		completeLastItemInProgressList();
 	}
 
-	function processFile(readPath, writePath) {
-		var fileContents = FS.readFileSync(readPath, {
+	function processFile(readPath, writePath, relativePath) {
+
+		var uuid = UUID.v1();
+		addNewItemToProgressList(relativePath, uuid);
+
+		FS.readFile(readPath, {
 			encoding: "utf8"
+		}, function (err, fileContents) {
+			var variables = [],
+				output = "",
+				$ = Cheerio.load(fileContents);
+			
+			extractVariables($, variables);
+			performReplacements($, variables);
+
+			if(input.output.type === "template")
+				output = outputTemplate(variables);
+			else if(input.output.type === "page")
+				output = $.html();
+			
+			output = HTMLBeautify(output);
+
+			FS.outputFile(writePath, output, "utf8", function(err){
+				completeItemInProgressList(uuid);
+				itemsRemaining--;
+				if(itemsRemaining === 0)
+					working = false;
+			});
 		});
-
-		variables = [];
-		output = "";
-
-		var $ = Cheerio.load(fileContents);
-		
-		extractVariables($);
-		performReplacements($);
-
-		if(input.output.type === "template")
-			output = outputTemplate();
-		else if(input.output.type === "page")
-			output = $.html();
-		
-		output = HTMLBeautify(output);
-
-		FS.outputFileSync(writePath, output, "utf8");
 	}
 
-	function extractVariables($) {		
+	function extractVariables($, variables) {		
 
 		input.getters.forEach(function (getter){
 			var $element = $(getter.selector);
@@ -308,7 +314,7 @@ function Transformer () {
 		});
 	}
 
-	function performReplacements($){
+	function performReplacements($, variables){
 
 		input.setters.forEach(function (setter){
 			var $element = $(setter.selector);
@@ -318,7 +324,7 @@ function Transformer () {
 		});
 	}
 
-	function outputTemplate(){
+	function outputTemplate(variables){
 		return Mustache.render(input.output.template, variables);
 	}
 
@@ -326,18 +332,16 @@ function Transformer () {
 		$progressList.empty();
 	}
 
-	function addNewItemToProgressList(item){
+	function addNewItemToProgressList(item, uuid){
 
-		completeLastItemInProgressList();
-
-		var $newItem = $('<li class="list-group-item list-group-item-danger">')
+		var $newItem = $('<li id="' + uuid + '" class="list-group-item list-group-item-danger">')
 			.text(item);
 
 		$progressList.append($newItem);
 	}
 
-	function completeLastItemInProgressList(){
-		$progressList.find("li:last-child")
+	function completeItemInProgressList(uuid){
+		$progressList.find("li#" + uuid)
 			.removeClass("list-group-item-danger")
 			.addClass("list-group-item-success");
 	}
