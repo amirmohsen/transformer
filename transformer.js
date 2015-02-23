@@ -13,10 +13,12 @@ function Transformer () {
 	var 
 	$form = $("#transformer-form"),
 	$dirInputs = $("input[type='file']"),
+	$progressList = $("#transformation-status-modal div.modal-body ul.list-group"),
 	templates = {},
 	input = {},
 	variables = [],
 	output = "";
+	working = false;
 	
 	init();
 
@@ -187,7 +189,15 @@ function Transformer () {
 	}
 
 	function readInput(event) {
+
 		event.preventDefault();
+
+		if(working)
+			return;
+
+		working = true;
+
+		clearProgressList();
 
 		$("input[name='sourceDir']")
 			.val($("input[name='sourceDirDialog']").val());
@@ -197,7 +207,11 @@ function Transformer () {
 
 		input = $form.serializeJSON();
 
-		readDirRecursively("");
+		setTimeout(function(){
+			readDirRecursively("");
+		}, 500);
+
+		working = false;
 	}
 
 	function readDirRecursively(path) {
@@ -219,9 +233,12 @@ function Transformer () {
 			else if(stats.isFile() &&
 				Path.extname(readPath) === ".html"){
 				writePath = Path.join(input.destDir, tempPath);
-			processFile(readPath, writePath);
-		}
-	});
+				addNewItemToProgressList(tempPath);
+				processFile(readPath, writePath);
+			}
+		});
+
+		completeLastItemInProgressList();
 	}
 
 	function processFile(readPath, writePath) {
@@ -303,6 +320,26 @@ function Transformer () {
 
 	function outputTemplate(){
 		return Mustache.render(input.output.template, variables);
+	}
+
+	function clearProgressList(){
+		$progressList.empty();
+	}
+
+	function addNewItemToProgressList(item){
+
+		completeLastItemInProgressList();
+
+		var $newItem = $('<li class="list-group-item list-group-item-danger">')
+			.text(item);
+
+		$progressList.append($newItem);
+	}
+
+	function completeLastItemInProgressList(){
+		$progressList.find("li:last-child")
+			.removeClass("list-group-item-danger")
+			.addClass("list-group-item-success");
 	}
 }
 
