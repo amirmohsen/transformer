@@ -249,7 +249,11 @@ function Transformer () {
 		}, function (err, fileContents) {
 			var variables = [],
 				output = "",
-				$ = Cheerio.load(fileContents);
+				$ = Cheerio.load(fileContents,{
+					lowerCaseAttributeNames: false,
+					lowerCaseTags: false,
+					decodeEntities: false
+				});
 			
 			extractVariables($, variables);
 			performReplacements($, variables);
