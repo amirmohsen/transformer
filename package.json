@@ -38,11 +38,5 @@
   "window": {
     "show": false,
     "toolbar": false
-  },
-  "devDependencies": {
-    "gulp": "^3.8.11",
-    "gulp-util": "^3.0.3",
-    "nodewebkit": "^0.11.6",
-    "node-webkit-builder": "^1.0.10"
   }
 }
