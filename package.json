@@ -1,6 +1,6 @@
 {
   "name": "Transformer",
-  "version": "0.0.1",
+  "version": "0.0.5",
   "description": "A utility app that parses html out of one file and extracts relevant data according to a given template and inserts it into a new html file.",
   "main": "index.html",
   "scripts": {
@@ -40,5 +40,10 @@
   "window": {
     "show": false,
     "toolbar": false
+  },
+  "devDependencies": {
+    "gulp": "^3.8.11",
+    "gulp-util": "^3.0.3",
+    "node-webkit-builder": "^1.0.10"
   }
 }
